@@ -51,9 +51,15 @@ const updateContact = async (contactId, name, email, phone) => {
     return null;
   }
 
-  contact.name = name;
-  contact.email = email;
-  contact.phone = phone;
+  if (name) {
+    contact.name = name;
+  }
+  if (email) {
+    contact.email = email;
+  }
+  if (phone) {
+    contact.phone = phone;
+  }
 
   await writeContacts(contacts);
 

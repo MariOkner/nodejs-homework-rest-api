@@ -2,60 +2,74 @@ const contacts = require("../models/contacts");
 const { HttpError } = require("../helpers");
 
 async function getContacts(req, res, next) {
-  const contactsList = await contacts.listContacts();
-  console.log(contactsList);
-  res.json(contactsList);
+  try {
+    const contactsList = await contacts.listContacts();
+
+    res.json(contactsList);
+  } catch (error) {
+    console.log("error", error);
+    next(error);
+  }
 }
 
 async function getContact(req, res, next) {
   const { contactId } = req.params;
-  const contact = await contacts.getContactById(contactId);
+  try {
+    const contact = await contacts.getContactById(contactId);
 
-  if (!contact) {
-    // return next(HttpError(404, "Not found!!!!!"));
-    return res.status(404).json({ message: "Not" });
+    if (!contact) {
+      return res.status(404).json({ message: `Not Found contact id: ${contactId}` });
+    }
+
+    res.json(contact);
+  } catch (error) {
+    next(error);
   }
-  res.json(contact);
 }
 
 async function createContact(req, res, next) {
   const { name, email, phone } = req.body;
 
-  if (!name || !email || !phone) {
-    return next(HttpError(400, "Missing required name field!"));
-    // return res.status(400).json({ message: "missing required name field" });
-  }
-  const newContact = await contacts.addContact(name, email, phone);
+  try {
+    const newContact = await contacts.addContact(name, email, phone);
 
-  res.status(201).json(newContact);
+    res.status(201).json(newContact);
+  } catch (error) {
+    next();
+  }
 }
 
 async function deleteContact(req, res, next) {
   const { contactId } = req.params;
-  const contact = await contacts.getContactById(contactId);
+  try {
+    const contact = await contacts.getContactById(contactId);
 
-  if (!contact) {
-    return next(HttpError(404, "Not found"));
+    if (!contact) {
+      return next(new HttpError(404, `Not Found contact id: ${contactId}`));
+    }
+
+    await contacts.removeContact(contactId);
+    res.status(200).json({ message: "contact deleted" });
+  } catch (error) {
+    next();
   }
-  await contacts.removeContact(contactId);
-  res.status(200).json({ message: "contact deleted" });
 }
 
 async function updateContact(req, res, next) {
   const { contactId } = req.params;
   const { name, email, phone } = req.body;
 
-  if (!name && !email && !phone) {
-    return next(HttpError(400, "Missing fields"));
-  }
+  try {
+    const updatedContact = await contacts.updateContact(contactId, name, email, phone);
 
-  const updatedContact = await contacts.updateContact(contactId, name, email, phone);
-
-  if (!updatedContact) {
-    res.status(404).json({ message: "Not found" });
-    return;
+    if (!updatedContact) {
+      res.status(404).json({ message: `Not Found contact id: ${contactId}` });
+      return;
+    }
+    res.status(200).json(updatedContact);
+  } catch (error) {
+    next();
   }
-  res.status(200).json(updatedContact);
 }
 
 module.exports = {

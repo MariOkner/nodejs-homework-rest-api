@@ -22,25 +22,9 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  if (err.status) {
-    res.status(err.status).json({
-      message: err.message,
-    });
-  }
-
-  res.status(500).json({
-    message: "Internal server error",
+  res.status(err.status || 500).json({
+    message: err.message || "Internal server error",
   });
 });
-
-// app.listen(3000, () => {
-//   console.log("server is listening on port 3000");
-// });
-
-// const PORT = process.env.PORT || 3000;
-
-// app.listen(PORT, function () {
-//   console.log(`Server running. Use our API on port: ${PORT}`);
-// });
 
 module.exports = app;
