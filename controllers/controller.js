@@ -14,11 +14,8 @@ async function getContacts(req, res, next) {
 
 async function getContact(req, res, next) {
   const { contactId } = req.params;
-  console.log("contactId", contactId);
   try {
-    console.log("123");
     const contact = await Contact.findById(contactId);
-    console.log("contact", contact);
 
     if (!contact) {
       return res.status(404).json({ message: `Not Found contact id: ${contactId}` });
@@ -34,9 +31,15 @@ async function createContact(req, res, next) {
   const { name, email, phone } = req.body;
 
   try {
-    const newContact = await Contact.create({ name, email, phone });
+    console.log("2");
+    const newContact = await Contact.create({
+      name,
+      email,
+      phone,
+    });
 
-    res.status(201).json(newContact);
+    console.log("newContact", newContact);
+    return res.status(201).json(newContact);
   } catch (error) {
     next();
   }
@@ -46,15 +49,19 @@ async function deleteContact(req, res, next) {
   const { contactId } = req.params;
   try {
     const contact = await Contact.findById(contactId);
-
+    console.log("1");
     if (!contact) {
       return next(new HttpError(404, `Not Found contact id: ${contactId}`));
     }
-
-    await Contact.getByIdAndRemove(contactId);
-    res.status(200).json({ message: "contact deleted" });
+    console.log("2");
+    await Contact.findByIdAndRemove(contactId);
+    console.log("3");
+    return res.status(200).json({ message: "contact deleted" });
+    console.log("4");
   } catch (error) {
+    console.log("5");
     next();
+    console.log("6");
   }
 }
 
