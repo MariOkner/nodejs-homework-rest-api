@@ -7,7 +7,6 @@ async function getContacts(req, res, next) {
 
     res.json(contactsList);
   } catch (error) {
-    console.log("error", error);
     next(error);
   }
 }
@@ -28,20 +27,19 @@ async function getContact(req, res, next) {
 }
 
 async function createContact(req, res, next) {
-  const { name, email, phone } = req.body;
+  const { name, email, phone, favorite } = req.body;
 
   try {
-    console.log("2");
     const newContact = await Contact.create({
       name,
       email,
       phone,
+      favorite,
     });
 
-    console.log("newContact", newContact);
     return res.status(201).json(newContact);
   } catch (error) {
-    next();
+    next(error);
   }
 }
 
@@ -49,19 +47,15 @@ async function deleteContact(req, res, next) {
   const { contactId } = req.params;
   try {
     const contact = await Contact.findById(contactId);
-    console.log("1");
+
     if (!contact) {
       return next(new HttpError(404, `Not Found contact id: ${contactId}`));
     }
-    console.log("2");
+
     await Contact.findByIdAndRemove(contactId);
-    console.log("3");
     return res.status(200).json({ message: "contact deleted" });
-    console.log("4");
   } catch (error) {
-    console.log("5");
-    next();
-    console.log("6");
+    next(error);
   }
 }
 
@@ -70,15 +64,34 @@ async function updateContact(req, res, next) {
   const { name, email, phone } = req.body;
 
   try {
-    const updatedContact = await Contact.findByIdAndUpdate(contactId, name, email, phone);
+    const updatedContact = await Contact.findByIdAndUpdate({ _id: contactId }, { name, email, phone }, { new: true });
 
     if (!updatedContact) {
       res.status(404).json({ message: `Not Found contact id: ${contactId}` });
       return;
     }
+
     res.status(200).json(updatedContact);
   } catch (error) {
-    next();
+    next(error);
+  }
+}
+
+async function updateStatusContact(req, res, next) {
+  const { contactId } = req.params;
+  const { favorite } = req.body;
+
+  try {
+    const updateStatusContact = await Contact.findByIdAndUpdate({ _id: contactId }, { favorite }, { new: true });
+
+    if (!updateStatusContact) {
+      res.status(404).json({ message: `Not Found contact id: ${contactId}` });
+      return;
+    }
+
+    res.status(200).json(updateStatusContact);
+  } catch (error) {
+    next(error);
   }
 }
 
@@ -88,4 +101,5 @@ module.exports = {
   createContact,
   deleteContact,
   updateContact,
+  updateStatusContact,
 };
