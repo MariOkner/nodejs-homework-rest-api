@@ -2,8 +2,12 @@ const { HttpError } = require("../helpers");
 const { Contact } = require("../models/contacts");
 
 async function getContacts(req, res, next) {
+  const { _id } = req.user;
+  const { page = 1, limit = 20 } = req.query;
+  const skip = (page - 1) * limit;
+
   try {
-    const contactsList = await Contact.find();
+    const contactsList = await Contact.find({ owner: _id }, "", { skip, limit: Number(limit) }).populate("owner", { id: _id, email: 1 });
 
     res.json(contactsList);
   } catch (error) {
@@ -27,14 +31,12 @@ async function getContact(req, res, next) {
 }
 
 async function createContact(req, res, next) {
-  const { name, email, phone, favorite } = req.body;
+  const { _id } = req.user;
 
   try {
     const newContact = await Contact.create({
-      name,
-      email,
-      phone,
-      favorite,
+      ...req.body,
+      owner: _id,
     });
 
     return res.status(201).json(newContact);

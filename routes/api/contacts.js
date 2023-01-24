@@ -6,17 +6,19 @@ const {
   deleteContact,
   updateContact,
   updateStatusContact,
-} = require("../../controllers/controller");
-const { validateBody } = require("../../middlewares/validate");
+} = require("../../controllers/contacts.controller");
+const { auth, validateBody } = require("../../middlewares/validate");
 const { addContactsSchema, updateContactsSchema, updateStatusContactSchema } = require("../../schemas/contacts");
 
-const router = express.Router();
+const contactsRouter = express.Router();
 
-router.get("/", getContacts);
-router.get("/:contactId", getContact);
-router.post("/", validateBody(addContactsSchema), createContact);
-router.delete("/:contactId", deleteContact);
-router.put("/:contactId", validateBody(updateContactsSchema), updateContact);
-router.patch("/:contactId", validateBody(updateStatusContactSchema), updateStatusContact);
+contactsRouter.get("/", auth, getContacts);
+contactsRouter.get("/:contactId", getContact);
+contactsRouter.post("/", auth, validateBody(addContactsSchema), createContact);
+contactsRouter.delete("/:contactId", deleteContact);
+contactsRouter.put("/:contactId", validateBody(updateContactsSchema), updateContact);
+contactsRouter.patch("/:contactId", validateBody(updateStatusContactSchema), updateStatusContact);
 
-module.exports = router;
+module.exports = {
+  contactsRouter,
+};
