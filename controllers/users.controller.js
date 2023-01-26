@@ -5,9 +5,7 @@ async function getCurrent(req, res, next) {
   const { email, subscription } = user;
 
   return res.status(200).json({
-    data: {
-      user: { email, subscription },
-    },
+    user: { email, subscription },
   });
 }
 
@@ -16,9 +14,7 @@ async function getContacts(req, res, next) {
   const userWithContacts = await User.findById(user._id).populate("contacts", { name: 1, email: 1, phone: 1, _id: 1 });
 
   return res.status(200).json({
-    data: {
-      contacts: userWithContacts.contacts,
-    },
+    contacts: userWithContacts.contacts,
   });
 }
 
@@ -34,9 +30,7 @@ async function createContact(req, res, next) {
   await User.findByIdAndUpdate(user._id, user);
 
   return res.status(201).json({
-    data: {
-      contacts: user.contacts,
-    },
+    contacts: user.contacts,
   });
 }
 

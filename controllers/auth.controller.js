@@ -8,9 +8,6 @@ const { JWT_SECRET } = process.env;
 async function signup(req, res, next) {
   const { email, password } = req.body;
 
-  // const salt = await bcrypt.genSalt();
-  // const hashedPassword = await bcrypt.hash(password, salt);
-
   try {
     const savedUser = await User.create({
       email,
@@ -18,11 +15,9 @@ async function signup(req, res, next) {
     });
 
     res.status(201).json({
-      data: {
-        user: {
-          email,
-          subscription: savedUser.subscription,
-        },
+      user: {
+        email,
+        subscription: savedUser.subscription,
       },
     });
   } catch (error) {
@@ -41,10 +36,8 @@ async function login(req, res, next) {
       email,
     });
 
-    const isPasswordValid = await bcrypt.compare(password, storedUser.password);
-
-    if (!storedUser || !isPasswordValid) {
-      return next(new HttpError(401, "Email or password is wrong!"));
+    if (!storedUser || !storedUser.comparePassword(password)) {
+      return next(new HttpError(401, `Email ${email} or password is wrong!`));
     }
 
     const payload = {
@@ -56,12 +49,10 @@ async function login(req, res, next) {
     await User.findByIdAndUpdate(storedUser._id, { token });
 
     return res.status(201).json({
-      data: {
-        token,
-        user: {
-          email,
-          subscription: storedUser.subscription,
-        },
+      token,
+      user: {
+        email,
+        subscription: storedUser.subscription,
       },
     });
   } catch (error) {

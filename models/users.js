@@ -35,6 +35,10 @@ const schema = mongoose.Schema(
   }
 );
 
+schema.methods.comparePassword = function (password) {
+  return bcrypt.compareSync(password.this.password);
+};
+
 schema.pre("save", async function () {
   const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash(this.password, salt);
