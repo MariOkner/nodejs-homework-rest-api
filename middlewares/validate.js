@@ -1,6 +1,8 @@
 const { HttpError } = require("../helpers");
-const jwt = require("jsonwebtoken");
 const { User } = require("../models/users");
+const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const path = require("path");
 
 const { JWT_SECRET } = process.env;
 
@@ -42,7 +44,18 @@ async function auth(req, res, next) {
   next();
 }
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.resolve(__dirname, "../tmp"));
+  },
+});
+
+const uploadAvatar = multer({
+  storage,
+});
+
 module.exports = {
   validateBody,
   auth,
+  uploadAvatar,
 };

@@ -39,11 +39,16 @@ async function login(req, res, next) {
     if (!storedUser || !storedUser.comparePassword(password)) {
       return next(new HttpError(401, `Email ${email} or password is wrong!`));
     }
+    // if (!storedUser) {
+    //   return next(new HttpError(401, `Email ${email} is wrong!!!!`));
+    // }
 
-    const payload = {
-      id: storedUser._id,
-    };
+    // const isPasswordValid = await bcrypt.compareSync(password, storedUser.password);
+    // if (!isPasswordValid) {
+    //   return next(new HttpError(401, `Password is wrong!!!!`));
+    // }
 
+    const payload = { id: storedUser._id };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "15h" });
 
     await User.findByIdAndUpdate(storedUser._id, { token });

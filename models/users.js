@@ -30,13 +30,16 @@ const schema = mongoose.Schema(
     ],
   },
   {
+    avatarURL: String,
+  },
+  {
     versionKey: false,
     timestamps: false,
   }
 );
 
 schema.methods.comparePassword = function (password) {
-  return bcrypt.compareSync(password.this.password);
+  return bcrypt.compareSync(password, this.password);
 };
 
 schema.pre("save", async function () {

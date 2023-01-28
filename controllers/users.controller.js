@@ -22,9 +22,9 @@ async function createContact(req, res, next) {
   const { user } = req;
   const { id: contactId } = req.body;
 
-  if (user._id) {
-    return res.status(208).json({ message: `This contact has already been added` });
-  }
+  // if (user._id) {
+  //   return res.status(208).json({ message: `This contact has already been added` });
+  // }
 
   user.contacts.push({ _id: contactId });
   await User.findByIdAndUpdate(user._id, user);
@@ -34,8 +34,18 @@ async function createContact(req, res, next) {
   });
 }
 
+async function uploadUserAvatar(req, res, next) {
+  //
+  console.log("req.file", req.file);
+
+  return res.json({
+    ok: true,
+  });
+}
+
 module.exports = {
   getCurrent,
   getContacts,
   createContact,
+  uploadUserAvatar,
 };
