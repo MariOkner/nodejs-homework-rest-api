@@ -1,7 +1,7 @@
 const { HttpError } = require("../helpers");
 const { User } = require("../models/users");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+const gravatar = require("gravatar");
 
 const { JWT_SECRET } = process.env;
 
@@ -9,15 +9,18 @@ async function signup(req, res, next) {
   const { email, password } = req.body;
 
   try {
+    const avatarURL = gravatar.url(email);
     const savedUser = await User.create({
       email,
       password,
+      avatarURL,
     });
 
     res.status(201).json({
       user: {
         email,
         subscription: savedUser.subscription,
+        avatarURL,
       },
     });
   } catch (error) {
@@ -40,10 +43,7 @@ async function login(req, res, next) {
       return next(new HttpError(401, `Email ${email} or password is wrong!`));
     }
 
-    const payload = {
-      id: storedUser._id,
-    };
-
+    const payload = { id: storedUser._id };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "15h" });
 
     await User.findByIdAndUpdate(storedUser._id, { token });

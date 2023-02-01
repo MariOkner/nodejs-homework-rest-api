@@ -22,6 +22,9 @@ const schema = mongoose.Schema(
       type: String,
       default: null,
     },
+    avatarURL: {
+      type: String,
+    },
     contacts: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -36,7 +39,7 @@ const schema = mongoose.Schema(
 );
 
 schema.methods.comparePassword = function (password) {
-  return bcrypt.compareSync(password.this.password);
+  return bcrypt.compareSync(password, this.password);
 };
 
 schema.pre("save", async function () {
