@@ -22,15 +22,15 @@ const schema = mongoose.Schema(
       type: String,
       default: null,
     },
+    avatarURL: {
+      type: String,
+    },
     contacts: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "contact",
       },
     ],
-  },
-  {
-    avatarURL: String,
   },
   {
     versionKey: false,

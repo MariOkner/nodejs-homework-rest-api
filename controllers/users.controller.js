@@ -1,4 +1,7 @@
 const { User } = require("../models/users");
+const path = require("path");
+const fs = require("fs/promises");
+const jimp = require("jimp");
 
 async function getCurrent(req, res, next) {
   const { user } = req;
@@ -35,12 +38,29 @@ async function createContact(req, res, next) {
 }
 
 async function uploadUserAvatar(req, res, next) {
-  //
-  console.log("req.file", req.file);
+  const { _id } = req.user;
+  const { filename } = req.file;
+  const tmpPath = path.resolve(__dirname, "../tmp", filename);
 
-  return res.json({
-    ok: true,
-  });
+  const avatar = await jimp.read(tmpPath);
+  await avatar.resize(250, 250);
+  await avatar.writeAsync(tmpPath);
+
+  const publicPath = path.resolve(__dirname, "../public/avatars", filename);
+
+  try {
+    await fs.rename(tmpPath, publicPath);
+    const avatarURL = path.resolve("../public/avatars", filename);
+
+    await User.findByIdAndUpdate(_id, { avatarURL });
+
+    return res.json({
+      avatarURL,
+    });
+  } catch (error) {
+    await fs.unlink(tmpPath);
+    throw error;
+  }
 }
 
 module.exports = {
