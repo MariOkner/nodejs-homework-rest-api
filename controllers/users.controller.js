@@ -1,3 +1,4 @@
+const { HttpError } = require("../helpers");
 const { User } = require("../models/users");
 const path = require("path");
 const fs = require("fs/promises");
@@ -63,9 +64,33 @@ async function uploadUserAvatar(req, res, next) {
   }
 }
 
+async function verifyEmail(req, res, next) {
+  const { verificationToken } = req.params;
+
+  try {
+    const user = await User.findOne({
+      verificationToken: verificationToken,
+    });
+
+    if (!user) {
+      return next(new HttpError(404, "User not found"));
+    }
+
+    User.findOneAndUpdate(user._id, {
+      verify: true,
+      verificationToken: null,
+    });
+
+    return res.status(201).json({ message: "Verification successful" });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getCurrent,
   getContacts,
   createContact,
   uploadUserAvatar,
+  verifyEmail,
 };

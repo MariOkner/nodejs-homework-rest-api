@@ -25,6 +25,14 @@ const schema = mongoose.Schema(
     avatarURL: {
       type: String,
     },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+      required: [true, "Verify token is required"],
+    },
     contacts: [
       {
         type: mongoose.Schema.Types.ObjectId,
