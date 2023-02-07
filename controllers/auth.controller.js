@@ -1,18 +1,16 @@
 const { HttpError, sendMail } = require("../helpers");
 const { User } = require("../models/users");
 
-// const sendGrid = require("@sendgrid/mail");
 
 const jwt = require("jsonwebtoken");
 const gravatar = require("gravatar");
-const { v4: uuidv4 } = require("uuid");
+const { v4 } = require("uuid");
 
 const { JWT_SECRET } = process.env;
-// const { SEND_GRID_KEY } = process.env;
 
 async function signup(req, res, next) {
   const { email, password } = req.body;
-  const verificationToken = uuidv4();
+  const verifyToken = v4();
 
   try {
     const avatarURL = gravatar.url(email);
@@ -21,13 +19,13 @@ async function signup(req, res, next) {
       password,
       avatarURL,
       verify: false,
-      verificationToken,
+      verifyToken,
     });
 
     await sendMail({
       to: email,
       subject: "Please confirm your email",
-      html: `Please, POST http://localhost:3000/api/users/users/verify/${verificationToken}`,
+      html: `<a href="http://localhost:3000/api/users/verify/${verifyToken}">Please, confirm your email</a>`,
     });
 
     res.status(201).json({
@@ -53,12 +51,12 @@ async function login(req, res, next) {
       email,
     });
 
-    if (!storedUser.varify) {
-      return next(new HttpError(401, `Email ${email} is not varify`));
-    }
-
     if (!storedUser || !storedUser.comparePassword(password)) {
       return next(new HttpError(401, `Email ${email} or password is wrong!`));
+    }
+
+    if (!storedUser.verify) {
+      return next(new HttpError(401, `Email ${email} is not verify`));
     }
 
     const payload = { id: storedUser._id };

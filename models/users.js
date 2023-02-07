@@ -29,7 +29,7 @@ const schema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    verificationToken: {
+    verifyToken: {
       type: String,
       required: [true, "Verify token is required"],
     },

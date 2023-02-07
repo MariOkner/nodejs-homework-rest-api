@@ -1,21 +1,24 @@
-const sendGrid = require("@sendgrid/mail");
-require("dotenv").config();
+const nodemailer = require('nodemailer');
 
-const { SEND_GRID_KEY } = process.env;
+const {EMAIL_USER, EMAIL_PASS} = process.env;
 
 async function sendMail({ to, subject, html }) {
-  sendGrid.setApiKey(SEND_GRID_KEY);
   const email = {
+    from: "info@gmail.com",
     to,
     subject,
     html,
-    from: "rirenko20.83@gmail.com",
   };
+  const transport = nodemailer.createTransport({
+    host: "sandbox.smtp.mailtrap.io",
+    port: 2525,
+    auth: {
+      user: EMAIL_USER,
+      pass: EMAIL_PASS,
+    }
+  });
 
-  try {
-    const response = await sendGrid.send(email);
-    console.log(response);
-  } catch (error) {}
+  await transport.sendMail(email);
 }
 
 class HttpError extends Error {
@@ -29,3 +32,5 @@ module.exports = {
   sendMail,
   HttpError,
 };
+
+
