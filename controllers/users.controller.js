@@ -1,4 +1,6 @@
+const { HttpError } = require("../helpers");
 const { User } = require("../models/users");
+
 const path = require("path");
 const fs = require("fs/promises");
 const jimp = require("jimp");
@@ -24,10 +26,6 @@ async function getContacts(req, res, next) {
 async function createContact(req, res, next) {
   const { user } = req;
   const { id: contactId } = req.body;
-
-  // if (user._id) {
-  //   return res.status(208).json({ message: `This contact has already been added` });
-  // }
 
   user.contacts.push({ _id: contactId });
   await User.findByIdAndUpdate(user._id, user);
@@ -63,9 +61,54 @@ async function uploadUserAvatar(req, res, next) {
   }
 }
 
+async function verifyEmail(req, res, next) {
+  const { verificationToken } = req.params;
+
+  try {
+    const user = await User.findOne({
+      verifyToken: verificationToken,
+    });
+
+    if (!user) {
+      return next(new HttpError(404, "User not found"));
+    }
+
+    await User.findByIdAndUpdate(user._id, {
+      verify: true,
+      verifyToken: null,
+    });
+
+    return res.status(201).json({ message: "Verification successful" });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function sendVerifyEmail(req, res, next) {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({email});
+    
+    if (!user) {
+      return next(new HttpError(400, "Unknow user"));
+    };
+
+    if (user.verify) {
+      return next(new HttpError(400, "Verification has already been passed"));
+    };
+
+    res.status(200).json({message: "Verification email sent"});
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getCurrent,
   getContacts,
   createContact,
   uploadUserAvatar,
+  verifyEmail,
+  sendVerifyEmail,
 };

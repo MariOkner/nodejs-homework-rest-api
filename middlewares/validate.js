@@ -12,7 +12,7 @@ function validateBody(schema) {
     const { error } = schema.validate(req.body);
 
     if (error) {
-      return next(new HttpError(400, "Missing required name field!"));
+      return next(new HttpError(400, error.message));
     }
     return next();
   };
@@ -36,13 +36,13 @@ async function auth(req, res, next) {
 
     req.user = user;
   } catch (error) {
+
     if (error.name === "TokenExpiredError" || error.name === "JsonWebTokenError") {
       return next(new HttpError(401, "jwt token is not valid"));
     }
 
     next(error);
   }
-
   next();
 }
 
